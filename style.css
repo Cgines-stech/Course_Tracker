@@ -1,0 +1,26 @@
+/* style.css */
+
+/* Small custom styles; Tailwind handles most layout & styling */
+:root { color-scheme: light; }
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+/* Utility: hide number input spinners */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield; /* Firefox */
+  appearance: textfield;      /* Modern spec fallback */
+}
+
+.card {
+  background: white;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+/* Badge colors are toggled via Tailwind classes from JS */
