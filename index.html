@@ -84,7 +84,7 @@
       <!-- Admin preview -->
       <details class="mt-5" id="adminPanel">
         <summary class="font-semibold cursor-pointer">Admin / Backend Settings</summary>
-        <p class="text-sm text-slate-600 mt-2">Edit <code>APP_CONFIG</code> in <code>script.js</code> to control programs, courses, total hours, allowed days, and global holidays.</p>
+        <p class="text-sm text-slate-600 mt-2">Edit <code>APP_CONFIG</code> in <code>script.js</code> to control programs, courses, total hours, allowed days, and admin blackout dates (single dates or ranges).</p>
         <textarea id="configPreview" class="mt-2 w-full h-48 rounded-xl border-slate-300 text-xs font-mono p-3" readonly></textarea>
       </details>
     </section>
@@ -125,16 +125,6 @@
           <p><span class="font-medium">% Expected by Today:</span> <span id="pctExpected">0%</span></p>
           <p class="md:col-span-2"><span class="font-medium">On Track?</span> <span id="onTrack" class="inline-block px-2 py-1 rounded-lg bg-slate-200">—</span></p>
         </div>
-      </div>
-
-      <div id="about" class="card">
-        <h2 class="text-lg font-semibold">About</h2>
-        <p class="text-sm text-slate-700">Static app for GitHub Pages. Admins control Programs, Courses, total hours, allowed days, and global holidays via <code>APP_CONFIG</code> (script.js). Students pick a start date and weekly availability; the app builds a schedule and lets them export CSV/ICS.</p>
-        <ol class="text-sm text-slate-700 list-decimal pl-5 mt-2 space-y-1">
-          <li><strong>Deploy:</strong> Add these three files to a GitHub repo and enable GitHub Pages.</li>
-          <li><strong>Configure:</strong> Edit <code>APP_CONFIG</code> in <code>script.js</code>.</li>
-          <li><strong>Share:</strong> Distribute the Pages URL.</li>
-        </ol>
       </div>
     </section>
   </main>

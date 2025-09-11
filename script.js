@@ -5,24 +5,34 @@ const WD = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]; // 0..6
 // "Backend" configuration. Admin: edit this block in the repo.
 window.APP_CONFIG = {
   timezone: "America/Denver",
-  globalHolidays: [
-    "2025-10-20" // example school closure
+  /**
+   * Admin-set no-class dates. You can mix single dates and inclusive date ranges.
+   * Accepts strings (YYYY-MM-DD) OR objects { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }.
+   */
+  globalBlackouts: [
+    "2025-10-20", // single-day closure
+    { start: "2025-11-20", end: "2025-11-20" } // e.g., Fall Break week
   ],
   programs: [
     {
       name: "Automotive Tech",
+      /** Optional program-level blackouts */
+      blackouts: [
+        // e.g., { start: "2025-12-22", end: "2026-01-01" }
+      ],
       courses: [
-        { name: "Basic Theory I", totalHours: 135, allowedDays: [1,4] }, // Mon, Thu
-        { name: "Shop Practicum", totalHours: 90, allowedDays: [1,2,3,4,5] }
+        { name: "Basic Theory I", totalHours: 135, allowedDays: [1,2,3,4,5], blackouts: [] },
+        { name: "Basic Theory II", totalHours: 135, allowedDays: [1,2,3,4,5], blackouts: [] }
       ]
-    },
+    }/*,
     {
       name: "Welding",
+      blackouts: [],
       courses: [
-        { name: "Intro Welding", totalHours: 120, allowedDays: [2,3,5] },
-        { name: "Adv Welding", totalHours: 160, allowedDays: [1,3,4] }
+        { name: "Intro Welding", totalHours: 120, allowedDays: [2,3,5], blackouts: [] },
+        { name: "Adv Welding", totalHours: 160, allowedDays: [1,3,4], blackouts: [] }
       ]
-    }
+    }*/
   ]
 };
 
@@ -207,6 +217,29 @@ function computePace({sessions, totalHours, completedHours}) {
   return { scheduledToDate, pctActual, pctExpected, onTrack };
 }
 
+function normalizeBlackouts(items) {
+  // items: array of strings or {start,end}
+  const out = new Set();
+  const pushISO = (d) => out.add(d.toISOString().slice(0,10));
+  (items || []).forEach(it => {
+    if (!it) return;
+    if (typeof it === 'string') {
+      // single day
+      const [y,m,dd] = it.split('-').map(Number);
+      const d = new Date(y, m-1, dd);
+      pushISO(d);
+    } else if (it.start && it.end) {
+      const s = it.start, e = it.end;
+      const [ys,ms,ds] = s.split('-').map(Number);
+      const [ye,me,de] = e.split('-').map(Number);
+      let d = new Date(ys, ms-1, ds);
+      const end = new Date(ye, me-1, de);
+      for (; d <= end; d = addDays(d,1)) pushISO(d);
+    }
+  });
+  return out;
+}
+
 function main() {
   populateSelects(); initBlackouts();
   $('#startDate').valueAsDate = new Date();
@@ -225,7 +258,11 @@ function main() {
 
     const completedHours = Math.max(0, Number($('#completedHours').value || 0));
 
-    const holidays = new Set([ ...cfg.globalHolidays, ...personalBlackouts ]);
+    // Merge admin-defined blackouts (global -> program -> course) + personal
+    const adminGlobal = normalizeBlackouts(cfg.globalBlackouts);
+    const adminProgram = normalizeBlackouts(program.blackouts || []);
+    const adminCourse = normalizeBlackouts(course.blackouts || []);
+    const holidays = new Set([...adminGlobal, ...adminProgram, ...adminCourse, ...personalBlackouts]);
 
     const { sessions } = buildSchedule({
       startDate,
@@ -237,7 +274,7 @@ function main() {
 
     renderTable(sessions);
 
-    // Pace metrics (NEW)
+    // Pace metrics
     const { scheduledToDate, pctActual, pctExpected, onTrack } = computePace({
       sessions, totalHours: course.totalHours, completedHours
     });
